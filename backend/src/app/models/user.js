@@ -5,5 +5,6 @@ module.exports = (sequelize, DataTypes) => {
     password: DataTypes.STRING,
     cpf: DataTypes.STRING,
   });
+  
   return User;
 }
