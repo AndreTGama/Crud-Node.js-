@@ -1,11 +1,15 @@
 const { User } = require('../models');
 var empty = require('is-empty');
+
 module.exports = {
     async index(req, res){
-        return res.json({ok : true});
+        var allUser = await User.findAll();
+        res.end(JSON.stringify({user : allUser}));
     },
-
-    async store(req, res){
+    async indexCadastro(req, res){
+        res.end(JSON.stringify({message : 'Cadastro'}));    
+    },
+    async cadastrar(req, res){
         var lblname = req.body.lblNome;
         var lblemail = req.body.lblEmail;
         var lblpassword = req.body.lblSenha;
@@ -27,5 +31,27 @@ module.exports = {
         }else{
             res.end(JSON.stringify({message : 'Campos Vazios'}));
         }
-    }
+    },
+    async indexUpdate(req, res){
+        var idUser = req.params.id;
+        var user = await User.findOne({ where: {id: idUser} });
+        res.end(JSON.stringify({user : user}));
+    },
+    async update(req, res){
+
+        var idUser = req.params.id;
+        var lblname = req.body.lblNome;
+        var lblemail = req.body.lblEmail;
+        var lblpassword = req.body.lblSenha;
+        var lblcpf = req.body.lblCpf;
+
+        User.update({name: lblname, email: lblemail,password: lblpassword, cpf: lblcpf},{where: {id: idUser}});
+        res.end(JSON.stringify({message : 'Usuário Atualizado'}));
+    },
+    async delete(req, res){
+        var idUser = req.params.id;
+       
+        User.delete({where: {id: idUser}});
+        res.end(JSON.stringify({message : 'Usuário Apagado'}));
+    },
 };      
