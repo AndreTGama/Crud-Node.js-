@@ -45,13 +45,16 @@ module.exports = {
         var lblpassword = req.body.lblSenha;
         var lblcpf = req.body.lblCpf;
 
-        User.update({name: lblname, email: lblemail,password: lblpassword, cpf: lblcpf},{where: {id: idUser}});
-        res.end(JSON.stringify({message : 'Usuário Atualizado'}));
+        let updateValues = { name: lblname };
+        User.update(updateValues, { where: { id: idUser } }).then(() => {
+            res.end(JSON.stringify({message : 'Usuário Atualizado'}));
+        });
+        
     },
     async delete(req, res){
         var idUser = req.params.id;
        
-        User.delete({where: {id: idUser}});
+        User.destroy({where: {id: idUser}});
         res.end(JSON.stringify({message : 'Usuário Apagado'}));
     },
 };      
