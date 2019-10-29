@@ -7,6 +7,7 @@ const routes = new express.Router();
 const upload = multer();
 
 routes.get('/',userController.index);
+routes.post('/login',userController.login);
 routes.get('/cadastro',userController.indexCadastro);
 routes.post('/cadastro',userController.cadastrar);
 routes.get('/info/:id',userController.indexUpdate);

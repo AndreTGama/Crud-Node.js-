@@ -23,8 +23,10 @@ module.exports = {
             if(!emailExists){
                 var cpfExists = await User.findOne({ where: {cpf: lblcpf} });
                 if(!cpfExists){
-                    User.create({name: lblname, email: lblemail,password: lblpassword, cpf: lblcpf});
-                    res.end(JSON.stringify({message : 'Conta Criada com Sucesso !!!'}));
+                    bcrypt.hash(lblpassword, 10, function(err, hash) {
+                        User.create({name: lblname, email: lblemail, password: hash, cpf: lblcpf});
+                        res.end(JSON.stringify({message : 'Conta Criada com Sucesso !!!'}));
+                    });
                 }else{
                     res.end(JSON.stringify({message : 'CPF em uso no Sistema'}));
                 }
@@ -34,6 +36,29 @@ module.exports = {
         }else{
             res.end(JSON.stringify({message : 'Campos Vazios'}));
         }
+    },
+    
+    async login(req, res){
+        var lblemail = req.body.lblEmail;
+        var lblsenha = req.body.lblSenha;
+        if(!empty(lblemail) && !empty(lblsenha)){
+            var emailExists = await User.findOne({ where: {email: lblemail} });
+            if(emailExists){
+                var hash = emailExists['password']
+                bcrypt.compare(lblsenha, hash, function(err, senha) {
+                    if(senha) {
+                        res.end(JSON.stringify({message : 'Login'}));
+                    } else {
+                        res.end(JSON.stringify({message : 'Senha Incorreta'}));
+                    }
+                }); 
+            }else{
+                res.end(JSON.stringify({message : 'E-mail não existe no Sistema'}));
+            }
+        }else{
+            res.end(JSON.stringify({message : 'Campos Vazios'}));
+        }
+
     },
 
     async indexUpdate(req, res){
