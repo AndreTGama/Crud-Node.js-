@@ -58,7 +58,6 @@ module.exports = {
         }else{
             res.end(JSON.stringify({message : 'Campos Vazios'}));
         }
-
     },
 
     async indexUpdate(req, res){
@@ -71,8 +70,6 @@ module.exports = {
         var idUser = req.params.id;
         var lblname = req.body.lblNome;
         var lblemail = req.body.lblEmail;
-        var lblpassword = req.body.lblSenha;
-        var lblcpf = req.body.lblCpf;
         if(!empty(lblname) && !empty(lblemail)){
             if(lblname){
                 let updateValues = { name: lblname };
@@ -110,23 +107,27 @@ module.exports = {
         var lblNewpassword2 = req.body.lblSenha2;
         if(!empty(lblOldPassword) && !empty(lblNewPassword1) && !empty(lblNewpassword2)){
             var user = await User.findOne({ where: {id: idUser} });
-            var senha = user['password'];
-            if(senha == lblOldPassword){
-                if(lblNewPassword1 == lblNewpassword2){
-                    if(lblNewPassword1 != lblOldPassword){
-                        let updateValues = { password: lblNewPassword1 };
-                        User.update(updateValues, { where: { id: idUser } }).then(() => {
-                            res.end(JSON.stringify({message : 'Senha do Usuário Atualizado'}));
-                        });
+            var hash = user['password'];
+            bcrypt.compare(lblOldPassword, hash, function(err, senha) {
+                if(senha) {
+                    if(lblNewPassword1 == lblNewpassword2){
+                        if(lblNewPassword1 != lblOldPassword){
+                            bcrypt.hash(lblNewPassword1, 10, function(err, Newhash) {
+                                let updateValues = { password: Newhash };
+                                User.update(updateValues, { where: { id: idUser } }).then(() => {
+                                    res.end(JSON.stringify({message : 'Senha do Usuário Atualizado'}));
+                                });
+                            });
+                        }else{
+                            res.end(JSON.stringify({message : 'Senha Nova não pode ser igual a senha Antiga'}));
+                        }
                     }else{
-                        res.end(JSON.stringify({message : 'Senha Nova não pode ser igual a senha Antiga'}));
+                        res.end(JSON.stringify({message : 'Senha Nova não confere'}));
                     }
-                }else{
-                    res.end(JSON.stringify({message : 'Senha Nova não confere'}));
+                } else {
+                    res.end(JSON.stringify({message : 'Senha Incorreta'}));
                 }
-            }else{
-                res.end(JSON.stringify({message : 'Senha não confere'}));
-            }
+            }); 
         }else{
             res.end(JSON.stringify({message : 'Campos Vazios'}));
         }
@@ -144,9 +145,11 @@ module.exports = {
             if(email == lblEmail){
                 if(lblNewPassword1 == lblNewpassword2){
                     if(lblNewPassword1 != lblOldPassword){
-                        let updateValues = { password: lblNewPassword1 };
-                        User.update(updateValues, { where: { id: idUser } }).then(() => {
-                            res.end(JSON.stringify({message : 'Senha do Usuário Atualizado'}));
+                        bcrypt.hash(lblNewPassword1, 10, function(err, Newhash) {
+                            let updateValues = { password: Newhash };
+                            User.update(updateValues, { where: { id: idUser } }).then(() => {
+                                res.end(JSON.stringify({message : 'Senha do Usuário Atualizado'}));
+                            });
                         });
                     }else{
                         res.end(JSON.stringify({message : 'Senha Nova não pode ser igual a senha Antiga'}));
